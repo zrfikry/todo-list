@@ -12,6 +12,8 @@ let tasks = {
   done: []
 }
 
+let newTaskId = 1
+
 let dragged = null
 
 function init () {
@@ -36,8 +38,9 @@ const allowDrag = function (event) {
 const addTask = function (event) {
   event.preventDefault()
   let text = taskText.value
-  tasks.todo.push(text)
+  tasks.todo.push({ id: newTaskId, content: text })
   taskText.value = ''
+  newTaskId++
   render()
 }
 
@@ -58,7 +61,7 @@ function render () {
   
         // view inside list
         let taskText = document.createElement('span')
-        taskText.innerText = item
+        taskText.innerText = item.content
         newList.appendChild(taskText)
   
         // add delete button
@@ -99,7 +102,7 @@ const itemDrop = function (event) {
 
   if (targetId !== dragged.from) {
     tasks[ targetId ].push(tasks[ dragged.from ][ dragged.itemId ])
-    tasks[ dragged.from ].splice(dragged.itemId)
+    tasks[ dragged.from ].splice(dragged.itemId, 1)
 
     dragged = null
     render()
@@ -112,7 +115,7 @@ const deleteItem = function (event) {
   const itemId = btnId.split('-')[2]
   const proceed = confirm('Delete item ?')
   if (proceed) {
-    tasks[ status ].splice(itemId)
+    tasks[ status ].splice(itemId, 1)
     render()
   }
 }

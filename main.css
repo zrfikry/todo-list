@@ -84,9 +84,12 @@ section.container ul > li {
   border-radius: 5px;
   height: 100%;
   width: 100%;
-  margin-bottom: 10px;
   display: inline-flex;
   justify-content: space-between;
+}
+
+section.container ul > li:not(:last-child) {
+  margin-bottom: 10px;
 }
 
 #todo {
