@@ -6,11 +6,7 @@ const doneBox = document.querySelector('#done')
 const taskText = document.querySelector('#taskText')
 const formTask = document.querySelector('#formTask')
 
-let tasks = {
-  todo: [],
-  onprogress: [],
-  done: []
-}
+let tasks = []
 
 let newTaskId = 1
 
@@ -37,10 +33,39 @@ const allowDrag = function (event) {
 
 const addTask = function (event) {
   event.preventDefault()
-  let text = taskText.value
-  tasks.todo.push({ id: newTaskId, content: text })
+  let inputValue = taskText.value
+  let text = inputValue.split(' ')
+  let inputCommand = text[0].toLowerCase()
+  let id = null
+
+  switch (inputCommand) {
+    case 'create':
+      tasks.push({ id: newTaskId, content: inputValue.substring(text[0].length + 2, inputValue.length - 1) , status: 'todo'})
+      newTaskId++
+      break
+    case 'move':
+      id = text[1]
+      let newStatus = text[2]
+      tasks.map(( task, index) => {
+        if (task.id === Number(id)) {
+          tasks[index].status = newStatus
+        }
+      })
+      break
+    case 'remove':
+      id = text[1]
+      tasks.map(( task, index) => {
+        if (task.id === Number(id)) {
+          tasks.splice(index, 1)
+        }
+      })
+      break
+    default:
+      alert('Command not found!')
+      break
+  }
+
   taskText.value = ''
-  newTaskId++
   render()
 }
 
@@ -49,73 +74,63 @@ function render () {
   onprogressBox.innerHTML = ''
   doneBox.innerHTML = ''
 
-  Object.keys(tasks).map(( status ) => {
-    console.log(`${status} : `, tasks[status])
+    tasks.map(( item ) => {
+      let newList = document.createElement('li')
+      newList.id = `task-${item.id}`
+      newList.draggable = true
+      newList.addEventListener('dragstart', itemDrag)
 
-    if (tasks[status].length !== 0) {
-      tasks[status].map(( item, index ) => {
-        let newList = document.createElement('li')
-        newList.id = `${status}-${index}`
-        newList.draggable = true
-        newList.addEventListener('dragstart', itemDrag)
-  
-        // view inside list
-        let taskText = document.createElement('span')
-        taskText.innerText = item.content
-        newList.appendChild(taskText)
-  
-        // add delete button
-        let deleteBtn = document.createElement('button')
-        deleteBtn.innerText = 'X'
-        deleteBtn.className = 'btn-delete'
-        deleteBtn.id = `delete-${status}-${index}`
-        deleteBtn.addEventListener('click', deleteItem)
-        newList.appendChild(deleteBtn)
-        
-        if (status === 'todo') {
-          todoBox.appendChild(newList)
-        } else if (status === 'onprogress') {
-          onprogressBox.appendChild(newList)
-        } else {
-          doneBox.appendChild(newList)
-        }
-      })
-    }
+      // view inside list
+      let taskText = document.createElement('span')
+      taskText.innerText = `[ ${item.id} ] ${item.content}`
+      newList.appendChild(taskText)
 
-  })
-  console.log('-------------------------------------------')
+      // add delete button
+      let deleteBtn = document.createElement('button')
+      deleteBtn.innerText = 'X'
+      deleteBtn.className = 'btn-delete'
+      deleteBtn.id = `delete-${item.id}`
+      deleteBtn.addEventListener('click', deleteItem)
+      newList.appendChild(deleteBtn)
+      
+      if (item.status === 'todo') {
+        todoBox.appendChild(newList)
+      } else if (item.status === 'onprogress') {
+        onprogressBox.appendChild(newList)
+      } else {
+        doneBox.appendChild(newList)
+      }
+    })
 }
 
 const itemDrag = function (event) {
   const id = event.target.id
-  const from = id.split('-')[0]
   const itemId = id.split('-')[1]
 
-  dragged = {
-    from,
-    itemId
-  }
+  dragged = Number(itemId)
 }
 
 const itemDrop = function (event) {
   const targetId = event.target.id
-
-  if (targetId !== dragged.from) {
-    tasks[ targetId ].push(tasks[ dragged.from ][ dragged.itemId ])
-    tasks[ dragged.from ].splice(dragged.itemId, 1)
-
-    dragged = null
-    render()
-  }
+  tasks.map(( task, index ) => {
+    if (task.id === dragged) {
+      tasks[index].status = targetId
+    }
+  })
+  dragged = null
+  render()
 }
 
 const deleteItem = function (event) {
   const btnId = event.target.id
-  const status = btnId.split('-')[1]
-  const itemId = btnId.split('-')[2]
+  const itemId = Number(btnId.split('-')[1])
   const proceed = confirm('Delete item ?')
   if (proceed) {
-    tasks[ status ].splice(itemId, 1)
+    tasks.map(( task, index ) => {
+      if (task.id === itemId) {
+        tasks.splice(index, 1)
+      }
+    })
     render()
   }
 }
