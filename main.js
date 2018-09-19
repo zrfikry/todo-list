@@ -1,7 +1,7 @@
 document.body.onload = init
 
 const todoBox = document.querySelector('#todo')
-const onprogressBox = document.querySelector('#onprogress')
+const onprogressBox = document.querySelector('#progress')
 const doneBox = document.querySelector('#done')
 const taskText = document.querySelector('#taskText')
 const formTask = document.querySelector('#formTask')
@@ -61,7 +61,7 @@ const addTask = function (event) {
       })
       break
     default:
-      alert('Command not found!')
+      alert('Command not found! use `create "task name"` or move [task id] [status] or remove [task id]')
       break
   }
 
@@ -95,7 +95,7 @@ function render () {
       
       if (item.status === 'todo') {
         todoBox.appendChild(newList)
-      } else if (item.status === 'onprogress') {
+      } else if (item.status === 'progress') {
         onprogressBox.appendChild(newList)
       } else {
         doneBox.appendChild(newList)
